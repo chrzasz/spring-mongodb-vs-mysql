@@ -10,31 +10,35 @@ import java.util.List;
 @Service
 public class PersonService {
 
-    private PersonRepository personRepository;
+    private PersonRepository repository;
 
     @Autowired
-    public PersonService(PersonRepository personRepository) {
-        this.personRepository = personRepository;
+    public PersonService(PersonRepository repository) {
+        this.repository = repository;
     }
 
     public Person create(String firstName, String lastName, String email) {
-        return personRepository.save(new Person(firstName, lastName, email));
+        return repository.save(new Person(firstName, lastName, email));
     }
 
     public List<Person> getAll() {
-        return personRepository.findAll();
+        return repository.findAll();
+    }
+
+    public void deleteAll() {
+        repository.deleteAll();
     }
 
     public List<Person> getByFirstName(String firstName) {
-        return personRepository.findByFirstName(firstName);
+        return repository.findByFirstName(firstName);
     }
 
     public List<Person> getByLastName(String lastName) {
-        return personRepository.findByLastName(lastName);
+        return repository.findByLastName(lastName);
     }
 
     public Person getByEmail(String email) {
-        return personRepository.findByEmail(email);
+        return repository.findByEmail(email);
     }
 
 

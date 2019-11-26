@@ -7,7 +7,7 @@ import pl.inome.springmongodbvsmysql.model.Person;
 import java.util.List;
 
 @Repository
-public interface PersonRepository extends MongoRepository<Person, Long> {
+public interface PersonRepository extends MongoRepository<Person, String> {
 
     List<Person> findByFirstName(String firstName);
     List<Person> findByLastName(String lastName);
