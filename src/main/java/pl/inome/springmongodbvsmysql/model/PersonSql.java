@@ -1,10 +1,7 @@
 package pl.inome.springmongodbvsmysql.model;
 
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class PersonSql {
@@ -14,6 +11,7 @@ public class PersonSql {
     Long id;
     String firstName;
     String lastName;
+    @Column(unique = true)
     String email;
 
     public PersonSql() {

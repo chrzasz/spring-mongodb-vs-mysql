@@ -3,10 +3,14 @@ package pl.inome.springmongodbvsmysql;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
+import pl.inome.springmongodbvsmysql.model.Person;
+import pl.inome.springmongodbvsmysql.model.PersonSql;
 import pl.inome.springmongodbvsmysql.service.PersonService;
 import pl.inome.springmongodbvsmysql.service.PersonSqlService;
+import pl.inome.springmongodbvsmysql.utils.CsvReader;
 
-import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class Starter implements CommandLineRunner {
@@ -14,9 +18,10 @@ public class Starter implements CommandLineRunner {
     PersonService personService;
     PersonSqlService personSqlService;
 
-    String line;
-    long startTime;
-    long elapsedTime;
+    List<List<String>> metadata = new ArrayList<>();
+    List<Person> personList = new ArrayList<>();
+    List<PersonSql> personSqlList = new ArrayList<>();
+
 
     @Autowired
     public Starter(PersonService personService, PersonSqlService personSqlService) {
@@ -26,54 +31,39 @@ public class Starter implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        startTime = System.nanoTime();
-        personService.deleteAll();
-        elapsedTime = System.nanoTime() - startTime;
-        System.out.println(elapsedTime / 1000000 + "\t\tTotal execution time to delete 3000K objects in MongoDb");
 
-        startTime = System.nanoTime();
-        personSqlService.deleteAll();
-        elapsedTime = System.nanoTime() - startTime;
-        System.out.println(elapsedTime / 1000000 + "\tTotal execution time to delete 3000K objects in MySQL");
+        personService.deleteAllFromMongo();
+        personSqlService.deleteAllFromSql();
 
-        File file = new File("data.csv");
+        CsvReader csvReader = new CsvReader("data.csv", ";");
+        metadata = csvReader.getRecords();
 
-        FileInputStream fileInputStream = new FileInputStream(file);
-        InputStreamReader inputStreamReader = new InputStreamReader(fileInputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        line = bufferedReader.readLine();
+        int firstNameIdx = metadata.get(0).indexOf("first_name");
+        int lastNameIdx = metadata.get(0).indexOf("last_name");
+        int emailIdx = metadata.get(0).indexOf("email");
 
-        startTime = System.nanoTime();
-        try {
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] person = line.split(";");
-                personService.create(person[1], person[2], person[3]);
-//                personSqlService.create(person[1], person[2], person[3]);
-            }
-            bufferedReader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        for (int i = 1; i < metadata.size(); i++) { //skip header
+            personList.add(personService.create(
+                    metadata.get(i).get(firstNameIdx),
+                    metadata.get(i).get(lastNameIdx),
+                    metadata.get(i).get(emailIdx)));
+            personSqlList.add(personSqlService.create(
+                    metadata.get(i).get(firstNameIdx),
+                    metadata.get(i).get(lastNameIdx),
+                    metadata.get(i).get(emailIdx)));
         }
-        elapsedTime = System.nanoTime() - startTime;
-        System.out.println(elapsedTime / 1000000 + "\tTotal execution time to create 3000K objects in MongoDb");
 
-        FileInputStream fileInputStream1 = new FileInputStream(file);
-        InputStreamReader inputStreamReader1 = new InputStreamReader(fileInputStream1);
-        BufferedReader bufferedReader1 = new BufferedReader(inputStreamReader1);
-        line = bufferedReader1.readLine();
-        startTime = System.nanoTime();
-        try {
-            while ((line = bufferedReader1.readLine()) != null) {
-                String[] person = line.split(";");
-//                personService.create(person[1], person[2], person[3]);
-                personSqlService.create(person[1], person[2], person[3]);
-            }
-            bufferedReader1.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        elapsedTime = System.nanoTime() - startTime;
-        System.out.println(elapsedTime / 1000000 + "\tTotal execution time to create 3000K objects in MySQL");
+        personService.saveAllToMongo(personList);
+        personSqlService.saveAllToSql(personSqlList);
 
+        personService.getAllFromMongo();
+        personService.getAllFromMongo();
+        personService.getAllFromMongo();
+        personService.getAllFromMongo();
+
+        personSqlService.getAllFromSql();
+        personSqlService.getAllFromSql();
+        personSqlService.getAllFromSql();
+        personSqlService.getAllFromSql();
     }
 }

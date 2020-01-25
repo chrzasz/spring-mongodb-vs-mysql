@@ -2,6 +2,7 @@ package pl.inome.springmongodbvsmysql.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.inome.springmongodbvsmysql.aspect.LogAspect;
 import pl.inome.springmongodbvsmysql.model.PersonSql;
 import pl.inome.springmongodbvsmysql.repository.PersonSqlRepository;
 
@@ -21,11 +22,18 @@ public class PersonSqlService {
         return repository.save(new PersonSql(firstName, lastName, email));
     }
 
-    public List<PersonSql> getAll() {
+    @LogAspect
+    public void saveAllToSql(List<PersonSql> list) {
+        repository.saveAll(list);
+    }
+
+    @LogAspect
+    public List<PersonSql> getAllFromSql() {
         return repository.findAll();
     }
 
-    public void deleteAll() {
+    @LogAspect
+    public void deleteAllFromSql() {
         repository.deleteAll();
     }
 
