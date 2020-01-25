@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class MethodLogger {
+public class AspectLogger {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MethodLogger.class);
+  private static final Logger LOG = LoggerFactory.getLogger(AspectLogger.class);
 
-  long startTime;
-  long elapsedTime;
+  private long startTime;
+  private long elapsedTime;
 
   @Around("execution(* *(..))  && @annotation(LogAspect)")
   public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
